@@ -6,19 +6,10 @@ The application enables **real-time quiz participation, automated evaluation, an
 
 ---
 
-# Project Information
-
-| Field | Details |
-|------|------|
-| Course | CSI3001 – Cloud Computing and Methodologies |
-| Project | Online Quiz Application |
-| Technologies | Google App Engine, Firebase Realtime Database |
-
----
 
 # Objective of the Project
 
-The objective of this project is to develop an **intuitive and scalable online quiz system** using cloud technologies.
+The objective of this project is to develop an **intuitive and scalable online quiz system** using google cloud services.
 
 The platform enables:
 
@@ -185,18 +176,6 @@ This ensures **instant updates across all connected devices**.
 
 ---
 
-## Firebase Analytics
-
-Tracks user activity and system performance.
-
-It helps analyze:
-
-- Application usage  
-- User engagement  
-- Platform performance  
-
----
-
 ## Gmail API
 
 Used to send automated notifications such as:
@@ -207,27 +186,6 @@ Used to send automated notifications such as:
 
 ---
 
-## Google Cloud Document AI API
-
-Processes documents and extracts structured information from files such as:
-
-- Quiz forms  
-- Reports  
-- Educational documents  
-
----
-
-# Key Features
-
-- Cloud-hosted architecture  
-- Real-time quiz updates  
-- Automatic result generation  
-- Secure authentication system  
-- Role-based user access  
-- Scalable backend infrastructure  
-- API-driven communication  
-
----
 
 # Technologies Used
 
@@ -237,7 +195,6 @@ Processes documents and extracts structured information from files such as:
 | Database | Firebase Realtime Database |
 | Authentication | Firebase Authentication |
 | APIs | Gmail API, Google Document AI |
-| Analytics | Firebase Analytics |
 | Backend | Google Cloud Services |
 
 
