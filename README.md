@@ -37,13 +37,9 @@ FACULTY USER FUNCTIONALITIES:
 
 <img width="940" height="588" alt="image" src="https://github.com/user-attachments/assets/ccf4c834-ce4d-47f0-95f8-9da78d9d2727" />
 
-<img width="940" height="588" alt="image" src="https://github.com/user-attachments/assets/eb009c16-87f7-4d90-978d-3925e832751c" />
-
 <img width="940" height="588" alt="image" src="https://github.com/user-attachments/assets/929d2759-2ea2-44f6-a832-bc3a7002d26f" />
 
 <img width="940" height="588" alt="image" src="https://github.com/user-attachments/assets/0576c491-ce84-4e68-ad73-aa550d09f609" />
-
-<img width="940" height="588" alt="image" src="https://github.com/user-attachments/assets/cbfad060-bb2e-4119-861f-7aff767e9894" />
 
 <img width="940" height="588" alt="image" src="https://github.com/user-attachments/assets/089b3f1d-dd93-47a7-8780-626e13b0779a" />
 
