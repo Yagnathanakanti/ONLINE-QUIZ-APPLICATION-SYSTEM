@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Course Manager</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* General layout */
+      body {
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        height: 100vh;
+        background-image: url("/images/bg2.jpg");
+        background-size: cover;
+        background-position: center;
+        color: #ffffff;
+        letter-spacing: 0.8px;
+      }
+
+      /* Profile Picture and Dropdown */
+      .profile-container {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+      }
+
+      .profile-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid #ffffff;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 40px;
+        right: 10px;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        white-space: nowrap;
+        border-radius: 8px;
+      }
+
+      .dropdown-content a {
+        padding: 10px 20px;
+        display: block;
+        text-decoration: none;
+        color: #333333;
+        font-size: 16px;
+      }
+
+      .dropdown-content a:hover {
+        background-color: #4192d5a0;
+      }
+
+      .profile-container:hover .dropdown-content {
+        display: block;
+      }
+
+      /* Courses heading */
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 28px;
+        color: #ffffff;
+      }
+
+      /* Course Tiles Layout */
+      .courses-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        width: 90%;
+        max-width: 800px;
+      }
+
+      /* Add Course Button and Course Tile Styles */
+      .add-course-btn,
+      .course-tile {
+        height: 100px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 10px;
+        text-align: center;
+      }
+
+      /* Add Course Button Specific Styles */
+      .add-course-btn {
+        background-color: #4192d5a0;
+      }
+
+      /* Course Tile Styles */
+      .course-tile {
+        background-color: #4192d5ba; /* 80% opacity */
+      }
+
+      .course-tile:hover {
+        transform: scale(1.05);
+        background-color: rgba(
+          65,
+          146,
+          213,
+          0.9
+        ); /* Slightly less transparent on hover */
+      }
+
+      /* Prompt overlay */
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .prompt {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .prompt input {
+        margin-bottom: 15px;
+        padding: 10px;
+        width: 220px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+
+      .prompt button {
+        padding: 10px 20px;
+        cursor: pointer;
+        background-color: #4192d5;
+        color: #ffffff;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: background-color 0.3s;
+      }
+
+      .prompt button:hover {
+        background-color: #356ca8;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Profile Picture and Dropdown -->
+    <div class="profile-container">
+      <img
+        src="/images/sample-profile-icon.png"
+        alt="Profile Picture"
+        class="profile-pic"
+        id="profilePic"
+      />
+      <div class="dropdown-content">
+        <a href="#" id="profileName">Name</a>
+        <a href="#" id="logout">Log out</a>
+      </div>
+    </div>
+
+    <!-- Courses Header -->
+    <h1>Courses</h1>
+
+    <!-- Courses Container -->
+    <div class="courses-container">
+      <!-- Add Course Button -->
+      <div class="add-course-btn" id="addCourseBtn">+</div>
+    </div>
+
+    <!-- Overlay Prompt -->
+    <div class="overlay" id="overlay">
+      <div class="prompt">
+        <h2>Add New Course</h2>
+        <input type="text" id="courseName" placeholder="Enter Course Name" />
+        <button onclick="addCourse()">Add</button>
+      </div>
+    </div>
+
+    <script type="module">
+      import {
+        getDatabase,
+        ref,
+        set,
+        push,
+        update,
+        get,
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+      import { auth } from "../firebaseSDK.js";
+
+      const db = getDatabase();
+      const addCourseBtn = document.getElementById("addCourseBtn");
+      const overlay = document.getElementById("overlay");
+      const coursesContainer = document.querySelector(".courses-container");
+
+      // Listen for auth state changes and fetch courses on page load
+      // onAuthStateChanged(auth, (user) => {
+      //   if (user) {
+      //     const profilePic = document.getElementById("profilePic");
+      //     user.reload().then(() => {
+      //       const updatedUser = auth.currentUser;
+      //       profilePic.src =
+      //         updatedUser.photoURL || "/images/sample-profile-icon.png";
+      //       profileName.textContent =
+      //         updatedUser.displayName + " (Faculty)" || "User (Faculty)";
+      //     });
+
+      //     // Fetch and display existing courses
+      //     fetchAndDisplayCourses(user.uid);
+      //   } else {
+      //     console.log("No user is signed in.");
+      //   }
+      // });
+
+      window.onload = function () {
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            const profilePic = document.getElementById("profilePic");
+            const profileName = document.getElementById("profileName");
+
+            user
+              .reload()
+              .then(() => {
+                const updatedUser = auth.currentUser;
+                profilePic.src =
+                  updatedUser.photoURL || "/images/sample-profile-icon.png";
+                profileName.textContent = updatedUser.displayName || "User";
+                // document.getElementById("profile-container").style.display =
+                //   "block";
+
+                // Display the user's courses
+                displayUserCourses();
+              })
+              .catch((error) => {
+                console.error("Error reloading user:", error);
+              });
+          } else {
+            console.log("No user is signed in.");
+          }
+        });
+      };
+
+      async function displayUserCourses() {
+        const user = auth.currentUser;
+        if (!user) return; // Return if the user is not logged in
+
+        try {
+          // Reference to the user's courses in the database
+          const userCoursesRef = ref(db, `users/${user.uid}/courses`);
+          const snapshot = await get(userCoursesRef);
+
+          // Check if the user has any courses
+          if (snapshot.exists()) {
+            const courses = snapshot.val();
+
+            for (const courseId in courses) {
+              // Fetch course details using courseId
+              const courseRef = ref(db, `courses/${courseId}`);
+              const courseSnapshot = await get(courseRef);
+              if (courseSnapshot.exists()) {
+                const courseData = courseSnapshot.val();
+                createCourseTile(courseId, courseData.courseName);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user courses:", error);
+        }
+      }
+
+      // Open the prompt when Add Course button is clicked
+      addCourseBtn.addEventListener("click", () => {
+        overlay.style.display = "flex";
+      });
+
+      // Function to add a new course
+      async function addCourse() {
+        const courseNameInput = document.getElementById("courseName");
+        const courseName = courseNameInput.value.trim();
+        const user = auth.currentUser;
+
+        if (courseName && user) {
+          try {
+            document.getElementById("overlay").style.display = "flex";
+
+            const newCourseRef = push(ref(db, "courses"));
+            const courseId = newCourseRef.key;
+
+            const courseData = {
+              courseName: courseName,
+              createdBy: user.uid,
+            };
+            await set(newCourseRef, courseData);
+
+            await update(ref(db, `users/${user.uid}/courses`), {
+              [courseId]: true,
+            });
+
+            createCourseTile(courseId, courseName);
+            document.getElementById("overlay").style.display = "none";
+            courseNameInput.value = "";
+          } catch (error) {
+            console.error("Error adding course:", error);
+            alert("Error adding course. Please try again.");
+          }
+        } else {
+          alert("Please enter a valid course name.");
+        }
+      }
+
+      window.addCourse = addCourse;
+
+      // Function to create a course tile in UI
+      function createCourseTile(courseId, courseName) {
+        const courseTile = document.createElement("div");
+        courseTile.classList.add("course-tile");
+        courseTile.style.backgroundColor = "#4192d5ba";
+        courseTile.textContent = courseName;
+        courseTile.dataset.courseId = courseId;
+
+        // Event listener to open the course page when clicked
+        courseTile.addEventListener("click", () =>
+          openCoursePage(courseId, courseName.trim())
+        );
+
+        // Insert the new course tile before the add course button
+        coursesContainer.insertBefore(
+          courseTile,
+          document.getElementById("addCourseBtn")
+        );
+      }
+
+      // Function to navigate to the course management page
+      function openCoursePage(courseId, courseName) {
+        window.location.href = `./coursepage.html?courseId=${courseId}&courseName=${encodeURIComponent(
+          courseName
+        )}`;
+      }
+
+      // Function to generate a random color for the course tile
+      // function getRandomColor() {
+      //   const letters = "0123456789ABCDEF";
+      //   let color = "#";
+      //   for (let i = 0; i < 6; i++) {
+      //     color += letters[Math.floor(Math.random() * 16)];
+      //   }
+      //   return color;
+      // }
+    </script>
+
+    <script src="../authentication/logout.js" type="module"></script>
+  </body>
+</html>

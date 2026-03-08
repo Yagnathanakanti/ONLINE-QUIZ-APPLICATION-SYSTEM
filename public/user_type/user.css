@@ -1,0 +1,67 @@
+/* Base Styling */
+body {
+  background-color: #101010;
+  color: white;
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-image: url("/images/bg_quiz.png");
+  background-size: cover;
+  background-position: center;
+}
+
+h1 {
+  text-align: center;
+  text-wrap: nowrap;
+  margin-bottom: 100px;
+}
+
+.choose-role {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 150px; /* Space between faculty and student sections */
+}
+
+.role {
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.role-icon {
+  width: 150px;
+  height: 150px;
+  transition: transform 0.3s ease;
+}
+
+/* Hover Effect */
+.role:hover .role-icon {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.role h2 {
+  color: #eceff7;
+  font-size: 1.5rem;
+  margin-top: 20px;
+  transition: color 0.3s;
+}
+
+.role:hover h2 {
+  color: #4285f4; /* Adjust based on faculty or student */
+}
+
+/* Faculty and Student Section Colors */
+.faculty:hover h2 {
+  color: #4285f4;
+}
+
+.student:hover h2 {
+  color: #34a853;
+}

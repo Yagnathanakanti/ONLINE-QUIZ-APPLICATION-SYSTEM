@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Dashboard</title>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        background-image: url("/images/bg_3.webp");
+      }
+
+      .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+
+      .quizzes {
+        background: #bec8d13b;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .quizzes h2 {
+        color: #333; /* Prime color */
+        margin-bottom: 10px;
+      }
+
+      .quiz-list {
+        display: flex;
+        flex-direction: column; /* Stack cards vertically */
+        gap: 15px; /* Space between cards */
+      }
+
+      .quiz-card {
+        background-color: #57a1dd2c; /* Very light green */
+        color: #333;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s, transform 0.3s;
+        cursor: pointer; /* Indicate that the cards are clickable */
+      }
+
+      .quiz-card:hover {
+        background-color: #4192d5; /* Darker shade on hover */
+        transform: translateY(-3px); /* Slight lift on hover */
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 1.3em;
+      }
+
+      p {
+        margin: 5px 0;
+      }
+
+      .attended .quiz-card {
+        background-color: #57a1dd2c; /* Very light green for attended quizzes */
+      }
+      .attended .quiz-card:hover {
+        background-color: #4192d5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Quiz Dashboard</h1>
+
+      <section class="quizzes scheduled">
+        <h2>Scheduled Quizzes</h2>
+        <div class="quiz-list" id="scheduled-quizzes">
+          <div class="quiz-card" id="quiz-math">
+            <h3>Math</h3>
+            <p><strong>No. of Questions:</strong> 10</p>
+            <p><strong>Time Slot:</strong> 10:00 AM - 11:00 AM</p>
+          </div>
+          <div class="quiz-card" id="quiz-science">
+            <h3>Science</h3>
+            <p><strong>No. of Questions:</strong> 15</p>
+            <p><strong>Time Slot:</strong> 1:00 PM - 2:00 PM</p>
+          </div>
+          <div class="quiz-card" id="quiz-history">
+            <h3>History</h3>
+            <p><strong>No. of Questions:</strong> 20</p>
+            <p><strong>Time Slot:</strong> 3:00 PM - 4:00 PM</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="quizzes attended">
+        <h2>Previously Attended Quizzes</h2>
+        <div class="quiz-list" id="attended-quizzes">
+          <div class="quiz-card">
+            <h3>Math</h3>
+            <p><strong>Score:</strong> 85%</p>
+            <p><strong>No. of Questions:</strong> 10</p>
+            <p><strong>Time Slot:</strong> 09:00 AM - 10:00 AM</p>
+          </div>
+          <div class="quiz-card">
+            <h3>Science</h3>
+            <p><strong>Score:</strong> 90%</p>
+            <p><strong>No. of Questions:</strong> 15</p>
+            <p><strong>Time Slot:</strong> 12:00 PM - 1:00 PM</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // Attach click event listeners to each quiz card
+      document.getElementById("quiz-math").addEventListener("click", () => {
+        window.location.href = "quiz_session.html?quiz=math"; // Redirect to the Math quiz page
+      });
+
+      document.getElementById("quiz-science").addEventListener("click", () => {
+        window.location.href = "quiz_session.html?quiz=science"; // Redirect to the Science quiz page
+      });
+
+      document.getElementById("quiz-history").addEventListener("click", () => {
+        window.location.href = "quiz_session.html?quiz=history"; // Redirect to the History quiz page
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <link rel="stylesheet" href="coursepage.css" />
+  </head>
+  <body>
+    <!-- Profile Container -->
+
+    <div class="header">
+      <h1 id="courseTitle">Loading...</h1>
+      <!-- <button id="addStudentBtn" class="add-button">+</button> -->
+      <div style="display: flex; gap: 10px">
+        <div class="dropdown">
+          <button id="addStudentBtn" class="add-button">+</button>
+          <div id="dropdownContent" class="dropdown-content">
+            <a href="#" id="addStudentsOption">Add Students</a>
+            <a href="#" id="addQuizDataOption">Add Quiz Data</a>
+            <a href="#" id="createQuizSessionOption">Create Quiz Session</a>
+          </div>
+        </div>
+        <div class="profile-container" id="profile-container">
+          <img
+            src="/images/sample-profile-icon.png"
+            alt="Profile Picture"
+            class="profile-pic"
+            id="profilePic"
+          />
+          <div class="dropdown-content">
+            <a href="#" id="profileName">Name</a>
+            <a href="#" id="logout">Log out</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="overlay1" class="overlay">
+      <div class="overlay-content">
+        <span id="closeOverlay" class="close-btn">&times;</span>
+        <h2>Add Students to Course</h2>
+        <div class="search-bar">
+          <input
+            type="text"
+            id="studentSearch"
+            placeholder="Search student by email"
+          />
+          <button id="addMemberBtn">Add Member</button>
+        </div>
+        <div id="studentList" class="student-list"></div>
+        <button id="confirm">Confirm</button>
+      </div>
+    </div>
+
+    <!-- Overlay for Add Quiz Data -->
+    <div id="quizDataOverlay" class="overlay">
+      <div class="overlay-content">
+        <span id="closeQuizDataOverlay" class="close-btn">&times;</span>
+        <h2>Add Quiz Data</h2>
+
+        <!-- Module Selection -->
+        <div>
+          <label for="moduleSelection">Select Module(s):</label>
+          <input
+            type="text"
+            id="moduleSelection"
+            placeholder="Enter module numbers"
+          />
+        </div>
+
+        <!-- Paste Questions -->
+        <div>
+          <label for="quizQuestions">Paste Questions:</label>
+          <textarea
+            id="quizQuestions"
+            placeholder="Paste your questions here, each followed by options and the correct answer"
+            rows="10"
+            cols="50"
+          ></textarea>
+        </div>
+
+        <!-- Or Upload File -->
+
+        <div class="file-upload-container">
+          <label for="fileUpload">Upload Quiz Data File</label>
+          <input type="file" id="fileUpload" />
+
+          <!-- File info container -->
+          <div id="fileInfo"></div>
+          <div id="errorMessage"></div>
+        </div>
+
+        <!-- Buttons to Save Quiz Data -->
+        <div>
+          <button id="saveQuizDataBtn">Save Quiz Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Quiz Session Modal -->
+    <div id="createQuizSessionOverlay" class="overlay">
+      <div class="overlay-content">
+        <span id="closeQuizSessionOverlay" class="close-btn">&times;</span>
+        <h2>Create Quiz Session</h2>
+        <form id="createQuizSessionForm">
+          <div class="form-group">
+            <label for="moduleInput">Module Numbers (comma separated):</label>
+            <input
+              type="text"
+              id="moduleInput"
+              placeholder="e.g., 1,2,3"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="dateInput">Date:</label>
+            <input type="date" id="dateInput" required />
+          </div>
+          <div class="form-group">
+            <label for="timeInput">Time:</label>
+            <input type="time" id="timeInput" required />
+          </div>
+          <div class="form-group">
+            <label for="durationInput">Quiz Duration (minutes):</label>
+            <input
+              type="number"
+              id="durationInput"
+              placeholder="e.g., 30"
+              required
+            />
+          </div>
+          <div class="form-group" id="questionsContainer">
+            <button type="button" id="confirmQuizBtn">
+              Confirm and Create Session
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Scheduled Quiz Sessions Container -->
+    <div class="quiz-sessions-container">
+      <h2>Scheduled Quiz Sessions</h2>
+      <div id="quizSessionsList" class="quiz-sessions-list"></div>
+    </div>
+
+    <!-- Quiz Details Overlay -->
+    <div id="viewQuizDetailsOverlay" class="overlay" style="display: none">
+      <div class="overlay-content">
+        <span id="closeQuizDetailsOverlay" class="close-btn">&times;</span>
+        <h2>Quiz Details</h2>
+        <ul id="questionsList"></ul>
+      </div>
+    </div>
+
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script
+      src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"
+      type="module"
+    ></script>
+    <!-- Firebase Messaging -->
+    <script
+      src="https://www.gstatic.com/firebasejs/11.0.1/firebase-messaging.js"
+      type="module"
+    ></script>
+    <!-- For PDF (pdf.js) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+
+    <!-- For DOCX (mammoth.js) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
+    ></script>
+    <script type="text/javascript">
+      (function () {
+        emailjs.init({
+          publicKey: "hCRtVEQUsCjQndRyl",
+        });
+      })();
+    </script>
+
+    <script type="module">
+      import { auth } from "/firebaseSDK.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+      window.onload = function () {
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            const profilePic = document.getElementById("profilePic");
+            const profileName = document.getElementById("profileName");
+
+            user
+              .reload()
+              .then(() => {
+                // Use updatedUser inside this block
+                const updatedUser = auth.currentUser;
+
+                // Set the profile picture and name
+                profilePic.src =
+                  updatedUser.photoURL || "/images/sample-profile-icon.png";
+                profileName.textContent = updatedUser.displayName || "User";
+
+                // Ensure the profile container is visible
+                document.getElementById("profile-container").style.display =
+                  "block";
+              })
+              .catch((error) => {
+                console.error("Error reloading user: ", error);
+              });
+          } else {
+            console.log("No user is signed in.");
+          }
+        });
+      };
+
+      import { database } from "/firebaseSDK.js";
+      import {
+        getDatabase,
+        ref,
+        push,
+        set,
+        update,
+        get,
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+      document.addEventListener("DOMContentLoaded", () => {
+        // Get the course name from the URL parameters and set it as the title
+        function getCourseNameFromUrl() {
+          const urlParams = new URLSearchParams(window.location.search);
+          const courseName = urlParams.get("courseName");
+          return courseName;
+        }
+
+        // Update the title and heading with the correct course name
+        const courseName = getCourseNameFromUrl();
+        const courseTitleElement = document.getElementById("courseTitle");
+
+        if (courseName) {
+          courseTitleElement.innerHTML = courseName;
+          document.title = `${courseName}`; // Set the page title
+        } else {
+          courseTitleElement.textContent = "Unknown Course";
+        }
+      });
+
+      function getCourseIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get("courseId");
+        return courseId;
+      }
+      function getCourseNameFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseName = urlParams.get("courseName");
+        return courseName;
+      }
+
+      const courseId = getCourseIdFromUrl();
+      const course_Name = getCourseNameFromUrl();
+
+      // Modal (Overlay) Handling
+      const addStudentBtn = document.getElementById("addStudentBtn");
+      const overlay1 = document.getElementById("overlay1");
+      const overlay2 = document.getElementById("quizDataOverlay");
+      const overlay3 = document.getElementById("createQuizSessionOverlay");
+      const closeOverlay = document.getElementById("closeOverlay");
+      const closeOverlay2 = document.getElementById("closeQuizDataOverlay");
+      const closeOverlay3 = document.getElementById("closeQuizSessionOverlay");
+
+      addStudentBtn.addEventListener("click", () => {
+        dropdownContent.classList.toggle("show");
+      });
+
+      // Option Elements
+      const addStudentsOption = document.getElementById("addStudentsOption");
+      const addQuizDataOption = document.getElementById("addQuizDataOption");
+      const createQuizSessionOption = document.getElementById(
+        "createQuizSessionOption"
+      );
+
+      // Click handlers for dropdown options
+      addStudentsOption.addEventListener("click", () => {
+        dropdownContent.classList.remove("show");
+        showAddStudentModal();
+      });
+
+      addQuizDataOption.addEventListener("click", () => {
+        dropdownContent.classList.remove("show");
+        showAddQuizDataModal();
+      });
+
+      createQuizSessionOption.addEventListener("click", () => {
+        dropdownContent.classList.remove("show");
+        showCreateQuizSessionModal();
+      });
+
+      closeOverlay.addEventListener("click", () => {
+        overlay1.style.display = "none";
+      });
+
+      closeOverlay2.addEventListener("click", () => {
+        overlay2.style.display = "none";
+      });
+
+      closeOverlay3.addEventListener("click", () => {
+        overlay3.style.display = "none";
+      });
+
+      window.addEventListener("click", (event) => {
+        if (event.target === overlay1) {
+          overlay1.style.display = "none";
+        }
+        if (event.target === overlay2) {
+          overlay2.style.display = "none";
+        }
+      });
+
+      function showAddStudentModal() {
+        overlay1.style.display = "flex";
+      }
+
+      function showAddQuizDataModal() {
+        overlay2.style.display = "flex";
+      }
+
+      function showCreateQuizSessionModal() {
+        overlay3.style.display = "flex";
+      }
+
+      // Adding Members to the List
+      const studentSearch = document.getElementById("studentSearch");
+      const studentList = document.getElementById("studentList");
+      const addMemberBtn = document.getElementById("addMemberBtn");
+      const confirmBtn = document.getElementById("confirm");
+
+      let studentEmails = [];
+
+      addMemberBtn.addEventListener("click", () => {
+        const studentEmail = studentSearch.value.trim();
+        if (studentEmail !== "") {
+          const studentDiv = document.createElement("div");
+          studentDiv.textContent = studentEmail;
+          studentList.appendChild(studentDiv);
+          studentEmails.push(studentEmail);
+          studentSearch.value = ""; // Clear the input field
+        }
+      });
+
+      emailjs.init("hCRtVEQUsCjQndRyl"); //public key
+
+      confirmBtn.addEventListener("click", () => {
+        studentEmails.forEach((email) => {
+          const templateParams = {
+            to_email: email,
+            course_name: course_Name,
+            faculty_name: auth.currentUser.displayName,
+          };
+
+          // Send email using EmailJS
+          emailjs
+            .send("service_amryf2x", "template_bhe2j0d", templateParams)
+            .then((response) => {
+              console.log("Email sent successfully", response);
+              alert(
+                "An email notification has been sent to the added members!"
+              );
+            })
+            .catch((error) => {
+              console.error("Failed to send email", error);
+            });
+        });
+
+        const overlay = document.getElementById("overlay1");
+        overlay.style.display = "none";
+      });
+
+      // Close overlay
+      document.getElementById("closeOverlay").addEventListener("click", () => {
+        const overlay = document.getElementById("overlay1");
+        overlay.style.display = "none";
+      });
+
+      let parsedQuizData = null; // Variable to hold the parsed quiz data
+
+      // File upload event listener
+      document
+        .getElementById("fileUpload")
+        .addEventListener("change", function (event) {
+          const file = event.target.files[0];
+          const fileInfo = document.getElementById("fileInfo");
+          const errorMessage = document.getElementById("errorMessage");
+
+          // Clear previous file info and error message
+          fileInfo.textContent = "";
+          errorMessage.textContent = "";
+
+          if (file) {
+            // Check file type
+            const allowedTypes = [".txt", ".docx", ".pdf"];
+            const fileExtension = file.name
+              .slice(file.name.lastIndexOf("."))
+              .toLowerCase();
+
+            if (!allowedTypes.includes(fileExtension)) {
+              errorMessage.textContent =
+                "Invalid file type. Please upload a .txt, .docx, or .pdf file.";
+              return;
+            }
+
+            // Check file size (e.g., limit to 5MB)
+            const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (file.size > maxFileSize) {
+              errorMessage.textContent =
+                "File size is too large. Please upload a file smaller than 5MB.";
+              return;
+            }
+
+            // Display file name and size
+            fileInfo.innerHTML = `<span>File:</span> ${
+              file.name
+            }<br/><span>Size:</span> ${(file.size / 1024).toFixed(2)} KB`;
+
+            // Process file based on type
+            if (fileExtension === ".pdf") {
+              extractTextFromPDF(file)
+                .then((text) => {
+                  // Parse the extracted text and structure the quiz data
+                  parsedQuizData = parseQuizQuestions(text);
+                })
+                .catch((error) => {
+                  errorMessage.textContent = "Error reading PDF file.";
+                  console.error(error);
+                });
+            } else if (fileExtension === ".docx") {
+              extractTextFromDOCX(file)
+                .then((text) => {
+                  // Parse the extracted text and structure the quiz data
+                  parsedQuizData = parseQuizQuestions(text);
+                })
+                .catch((error) => {
+                  errorMessage.textContent = "Error reading DOCX file.";
+                  console.error(error);
+                });
+            } else {
+              errorMessage.textContent =
+                "Invalid file format. Only PDF and DOCX are supported for quiz extraction.";
+            }
+          } else {
+            fileInfo.textContent = "No file selected";
+          }
+        });
+
+      // Save Quiz Data to Firebase
+      document
+        .getElementById("saveQuizDataBtn")
+        .addEventListener("click", () => {
+          const moduleSelection =
+            document.getElementById("moduleSelection").value;
+          const fileUpload = document.getElementById("fileUpload").files[0];
+
+          // Check if module and quiz questions are entered
+          if (moduleSelection && parsedQuizData) {
+            const quizData = {
+              module: moduleSelection,
+              questions: parsedQuizData || null,
+              file: fileUpload ? fileUpload.name : null,
+            };
+
+            // Save to Firebase Database
+            const newQuizDataRef = push(
+              ref(database, "courses/" + courseId + "/quizData")
+            );
+            set(newQuizDataRef, quizData)
+              .then(() => {
+                alert("Quiz data saved successfully!");
+                document.getElementById("quizDataOverlay").style.display =
+                  "none";
+              })
+              .catch((error) => {
+                console.error("Error saving quiz data:", error);
+              });
+          } else {
+            alert(
+              "Please ensure the module is selected and the file is processed."
+            );
+          }
+        });
+
+      // Function to extract text from PDF
+      function extractTextFromPDF(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const pdfData = new Uint8Array(e.target.result);
+            pdfjsLib
+              .getDocument(pdfData)
+              .promise.then((pdfDoc) => {
+                let text = "";
+                const numPages = pdfDoc.numPages;
+                let pagePromises = [];
+
+                // Loop through all pages of the PDF
+                for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+                  pagePromises.push(
+                    pdfDoc.getPage(pageNum).then((page) => {
+                      return page.getTextContent().then((textContent) => {
+                        text +=
+                          textContent.items.map((item) => item.str).join(" ") +
+                          "\n";
+                      });
+                    })
+                  );
+                }
+
+                // Once all pages are processed, resolve with the full text
+                Promise.all(pagePromises).then(() => resolve(text));
+              })
+              .catch(reject);
+          };
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(file);
+        });
+      }
+
+      // Function to extract text from DOCX
+      function extractTextFromDOCX(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const arrayBuffer = e.target.result;
+            mammoth
+              .extractRawText({ arrayBuffer: arrayBuffer })
+              .then((result) => {
+                resolve(result.value);
+              })
+              .catch(reject);
+          };
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(file);
+        });
+      }
+
+      // Function to parse quiz questions from the text input
+      function parseQuizQuestions(quizText) {
+        const lines = quizText.split("\n");
+        const questions = {};
+        let questionNumber = 0;
+        let currentQuestion = null;
+        let currentOptions = [];
+        let correctAnswer = null;
+
+        lines.forEach((line) => {
+          const trimmedLine = line.trim();
+
+          // Detect a new question (e.g., "Question 1")
+          if (trimmedLine.startsWith("Question")) {
+            // Save the previous question if it exists
+            if (currentQuestion && currentOptions.length && correctAnswer) {
+              questions[`q${questionNumber}`] = {
+                question: currentQuestion,
+                options: currentOptions,
+                answer: correctAnswer,
+              };
+            }
+
+            // Reset for the new question
+            questionNumber += 1;
+            currentQuestion = trimmedLine
+              .replace(/Question \d+[:]?/i, "")
+              .trim();
+            currentOptions = [];
+            correctAnswer = null;
+          }
+          // Detect options (e.g., "A) Option text")
+          else if (trimmedLine.match(/^[A-D]\)/)) {
+            currentOptions.push(trimmedLine);
+          }
+          // Detect the correct answer (e.g., "Correct Answer: A) Option text")
+          else if (trimmedLine.startsWith("Correct Answer:")) {
+            correctAnswer = trimmedLine.split("Correct Answer:")[1].trim();
+          }
+        });
+
+        // Save the last question
+        if (currentQuestion && currentOptions.length && correctAnswer) {
+          questions[`q${questionNumber}`] = {
+            question: currentQuestion,
+            options: currentOptions,
+            answer: correctAnswer,
+          };
+        }
+
+        return questions;
+      }
+
+      // Sample Data for Quiz Sessions
+      const quizSessionsData = [
+        {
+          quizName: "Module 1 - Basic Concepts",
+          totalScore: 10,
+          moduleNumber: "1",
+          date: "2024-11-20",
+          time: "14:00",
+          duration: "30",
+        },
+        {
+          quizName: "Module 2 - Advanced Topics",
+          totalScore: 15,
+          moduleNumber: "2",
+          date: "2024-11-25",
+          time: "10:00",
+          duration: "45",
+        },
+        {
+          quizName: "Module 3 - Final Assessment",
+          totalScore: 20,
+          moduleNumber: "3",
+          date: "2024-11-30",
+          time: "16:00",
+          duration: "60",
+        },
+      ];
+
+      // Function to display scheduled quiz sessions
+      function displayScheduledQuizSessions() {
+        const quizSessionsContainer =
+          document.getElementById("quizSessionsList");
+        quizSessionsContainer.innerHTML = ""; // Clear existing content
+
+        const quizSessionsRef = ref(
+          database,
+          `courses/${courseId}/quizSessions`
+        );
+        // Fetch quiz sessions from Firebase
+        get(quizSessionsRef)
+          .then((snapshot) => {
+            if (!snapshot.exists()) {
+              quizSessionsContainer.innerHTML =
+                "<p>No quiz sessions available.</p>";
+              return;
+            }
+
+            const quizSessionsData = snapshot.val();
+
+            // Loop through each quiz session and display
+            for (const sessionId in quizSessionsData) {
+              const session = quizSessionsData[sessionId];
+              const {
+                quizName,
+                totalScore,
+                moduleNumber,
+                date,
+                time,
+                duration,
+              } = session;
+
+              // Create quiz session tile element
+              const quizTile = document.createElement("div");
+              quizTile.className = "quiz-session-tile";
+              quizTile.innerHTML = `
+            <h3>${quizName}</h3>
+            <p><strong>Date:</strong> ${date}</p>
+            <p><strong>Time:</strong> ${time}</p>
+            <p><strong>Score:</strong> 0/${totalScore}</p>
+            <p><strong>Modules:</strong> ${moduleNumber}</p>
+            <p><strong>Duration:</strong> ${duration} minutes</p>
+            <button class="view-quiz-btn">View Details</button>
+          `;
+
+              // Append the tile to the container
+              quizSessionsContainer.appendChild(quizTile);
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching quiz sessions:", error);
+            alert("Failed to load quiz sessions.");
+          });
+      }
+
+      // Event Delegation for "View Details" button click
+      const quizSessionsContainer = document.getElementById("quizSessionsList");
+
+      quizSessionsContainer.addEventListener("click", (event) => {
+        // Check if the clicked element is a "View Details" button
+        if (event.target.classList.contains("view-quiz-btn")) {
+          // Retrieve the quiz name from the clicked button's parent element
+          const quizTile = event.target.closest(".quiz-session-tile");
+          const quizName = quizTile.querySelector("h3").textContent;
+          viewQuizDetails(quizName);
+        }
+      });
+
+      // Function to fetch and display quiz details in an overlay
+      function viewQuizDetails(quizName) {
+        const quizModule = quizName.split(" - ")[0].split(" ")[1]; // Extract module number from quizName
+        const courseRef = ref(database, `courses/${courseId}/quizData`);
+
+        // Fetch quiz data for the course
+        get(courseRef)
+          .then((snapshot) => {
+            if (!snapshot.exists()) {
+              console.log("No quiz data found for this course.");
+              alert("No quiz data found for this course.");
+              return;
+            }
+
+            const quizData = snapshot.val();
+
+            // Find the quiz with the matching module
+            let matchedQuizData = null;
+
+            for (const uniqueId in quizData) {
+              if (quizData[uniqueId].module === quizModule) {
+                matchedQuizData = quizData[uniqueId];
+                break;
+              }
+            }
+
+            if (!matchedQuizData) {
+              alert(`No quiz data found for module ${quizModule}.`);
+              return;
+            }
+
+            // Fetch questions from the matched quizData
+            const questionsData = matchedQuizData.questions;
+            if (!questionsData) {
+              alert("No questions available for this quiz.");
+              return;
+            }
+
+            const matchedQuestions = Object.values(questionsData);
+            console.log("Matched Questions:", matchedQuestions); // Debug log
+
+            // Display the overlay with the matched questions
+            openQuizDetailsOverlay(matchedQuestions);
+          })
+          .catch((error) => {
+            console.error("Error fetching quiz data:", error);
+            alert("Error fetching quiz details.");
+          });
+      }
+
+      // Display the overlay with formatted quiz questions
+      function openQuizDetailsOverlay(questionsArray) {
+        const overlay = document.getElementById("viewQuizDetailsOverlay");
+        const questionsList = document.getElementById("questionsList");
+        questionsList.innerHTML = ""; // Clear previous content
+
+        // Populate the list with quiz questions
+        if (Array.isArray(questionsArray) && questionsArray.length > 0) {
+          questionsArray.forEach((questionObj, index) => {
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `
+          <strong>Q${index + 1}:</strong> ${questionObj.question} <br/>
+          <em>Options:</em> ${questionObj.options.join(", ")} <br/>
+          <strong>Answer:</strong> ${questionObj.answer}
+        `;
+            questionsList.appendChild(listItem);
+          });
+        } else {
+          questionsList.innerHTML =
+            "<li>No questions available for this quiz.</li>";
+        }
+
+        // Display the overlay
+        overlay.style.display = "flex";
+      }
+
+      // Close overlay button functionality
+      document
+        .getElementById("closeQuizDetailsOverlay")
+        .addEventListener("click", () => {
+          document.getElementById("viewQuizDetailsOverlay").style.display =
+            "none";
+        });
+
+      // Function to handle creating new quiz session
+      function createQuizSession() {
+        const moduleInput = document.getElementById("moduleInput").value;
+        const dateInput = document.getElementById("dateInput").value;
+        const timeInput = document.getElementById("timeInput").value;
+        const durationInput = document.getElementById("durationInput").value;
+
+        // Validate inputs
+        if (!moduleInput || !dateInput || !timeInput || !durationInput) {
+          alert("Please fill all the required fields.");
+          return;
+        }
+
+        // Add the new quiz session data to the array
+        const newQuizSession = {
+          quizName: `Module ${moduleInput} - Advanced Quiz`,
+          totalScore: 10, // You can set this dynamically
+          moduleNumber: moduleInput,
+          date: dateInput,
+          time: timeInput,
+          duration: durationInput,
+        };
+
+        // Reference to the Firebase path where you want to store quiz sessions
+        const quizSessionsRef = ref(
+          database,
+          `courses/${courseId}/quizSessions`
+        );
+
+        // Push new quiz session data to Firebase
+        push(quizSessionsRef, newQuizSession)
+          .then(() => {
+            alert("Quiz session created successfully!");
+            // Fetch and display all quiz sessions after adding the new one
+            displayScheduledQuizSessions();
+          })
+          .catch((error) => {
+            console.error("Error saving quiz session:", error);
+            alert("Failed to create quiz session.");
+          });
+
+        // Optionally, you can close the modal here
+        document.getElementById("createQuizSessionOverlay").style.display =
+          "none";
+      }
+
+      // Event listener for the "Confirm and Create Session" button
+      document
+        .getElementById("confirmQuizBtn")
+        .addEventListener("click", createQuizSession);
+
+      // Event listener for closing the modal
+      document
+        .getElementById("closeQuizSessionOverlay")
+        .addEventListener("click", () => {
+          document.getElementById("createQuizSessionOverlay").style.display =
+            "none";
+        });
+
+      // Display the quiz sessions on page load
+      displayScheduledQuizSessions();
+    </script>
+  </body>
+</html>

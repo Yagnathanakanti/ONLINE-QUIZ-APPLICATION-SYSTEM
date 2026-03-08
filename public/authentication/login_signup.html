@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log In / Sign Up</title>
+    <link rel="stylesheet" href="/authentication/login_signup.css" />
+    <script
+      type="module"
+      src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"
+    ></script>
+    <script
+      type="module"
+      src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"
+    ></script>
+    <script
+      type="module"
+      src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"
+    ></script>
+  </head>
+  <body>
+    <div class="auth-container">
+      <!-- Log In Form -->
+      <div class="login-form" id="loginFormContainer">
+        <h2>Log In</h2>
+        <form id="loginForm">
+          <div class="input-group">
+            <label for="loginEmail">Email</label>
+            <input
+              type="email"
+              id="loginEmail"
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+          <div class="input-group">
+            <label for="loginPassword">Password</label>
+            <input
+              type="password"
+              id="loginPassword"
+              required
+              placeholder="Enter your password"
+            />
+          </div>
+          <div class="input-group">
+            <button type="submit" class="login-btn">Log In</button>
+          </div>
+          <div class="or-divider">
+            <hr />
+            <span>OR</span>
+            <hr />
+          </div>
+          <div
+            id="googleSignInButton"
+            class="custom-google-button"
+            onclick="signInWithGoogle()"
+          >
+            <img
+              src="/images/google-icon.png"
+              alt="Google Icon"
+              class="google-icon"
+            />
+            Sign in with Google
+          </div>
+          <p class="sign-up-link">
+            New user? <a href="#" id="signUpRedirect">Sign Up</a>
+          </p>
+        </form>
+      </div>
+
+      <!-- Sign Up Form -->
+      <div class="sign-up-form" id="signUpFormContainer">
+        <h2>Sign Up</h2>
+        <form id="signUpForm">
+          <div class="input-group">
+            <label for="signUpName">Full Name</label>
+            <input
+              type="text"
+              id="fullName"
+              required
+              placeholder="Enter your name"
+            />
+          </div>
+          <div class="input-group">
+            <label for="signUpEmail">Email</label>
+            <input
+              type="email"
+              id="emailSignUp"
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+          <div class="input-group">
+            <label for="signUpPassword">Password</label>
+            <input
+              type="password"
+              id="passwordSignUp"
+              required
+              placeholder="Create a password"
+            />
+          </div>
+          <div class="input-group">
+            <label for="ConfirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              required
+              placeholder="Confirm your password"
+            />
+          </div>
+          <div class="input-group">
+            <button type="submit" class="sign-up-btn">Sign Up</button>
+          </div>
+          <div class="or-divider">
+            <hr />
+            <span>OR</span>
+            <hr />
+          </div>
+          <div
+            id="googleSignUpButton"
+            class="custom-google-button"
+            onclick="signInWithGoogle()"
+          >
+            <img
+              src="/images/google-icon.png"
+              alt="Google Icon"
+              class="google-icon"
+            />
+            Sign up with Google
+          </div>
+          <p class="login-link">
+            Already have an account? <a href="#" id="loginRedirect">Log In</a>
+          </p>
+        </form>
+      </div>
+    </div>
+    <script type="module" src="/authentication/login_signup.js"></script>
+  </body>
+</html>

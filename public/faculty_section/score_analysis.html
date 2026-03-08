@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Score Analysis</title>
+    <style>
+      .dashboard {
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+      }
+
+      .stat-cards {
+        display: flex;
+        gap: 20px;
+      }
+
+      .stat-card {
+        background: #f4f4f9;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        flex: 1;
+      }
+
+      .graphs {
+        margin-top: 30px;
+      }
+
+      canvas {
+        width: 100%;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard">
+      <div class="score-overview">
+        <h2>Quiz Results Overview</h2>
+        <div class="stat-cards">
+          <div class="stat-card">
+            <h3>Average Score</h3>
+            <p id="average-score">85%</p>
+          </div>
+          <div class="stat-card">
+            <h3>Highest Score</h3>
+            <p id="highest-score">95%</p>
+          </div>
+          <div class="stat-card">
+            <h3>Lowest Score</h3>
+            <p id="lowest-score">65%</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="graphs">
+        <h3>Individual Performance</h3>
+        <canvas id="score-bar-chart"></canvas>
+
+        <h3>Score Distribution</h3>
+        <canvas id="score-pie-chart"></canvas>
+      </div>
+    </div>
+    <script>
+      const ctxBar = document
+        .getElementById("score-bar-chart")
+        .getContext("2d");
+      const ctxPie = document
+        .getElementById("score-pie-chart")
+        .getContext("2d");
+
+      // Example data
+      const studentScores = [90, 85, 78, 92, 88, 95, 67, 81]; // Students' individual scores
+      const scoreDistribution = [2, 3, 4]; // Number of students in each score range (e.g., 0-50%, 51-80%, 81-100%)
+
+      // Bar Chart for individual scores
+      new Chart(ctxBar, {
+        type: "bar",
+        data: {
+          labels: [
+            "Student 1",
+            "Student 2",
+            "Student 3",
+            "Student 4",
+            "Student 5",
+            "Student 6",
+            "Student 7",
+            "Student 8",
+          ],
+          datasets: [
+            {
+              label: "Scores",
+              data: studentScores,
+              backgroundColor: "rgba(54, 162, 235, 0.2)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true },
+          },
+        },
+      });
+
+      // Pie Chart for score distribution
+      new Chart(ctxPie, {
+        type: "pie",
+        data: {
+          labels: ["0-50%", "51-80%", "81-100%"],
+          datasets: [
+            {
+              label: "Score Distribution",
+              data: scoreDistribution,
+              backgroundColor: [
+                "rgba(255, 99, 132, 0.2)",
+                "rgba(75, 192, 192, 0.2)",
+                "rgba(153, 102, 255, 0.2)",
+              ],
+              borderColor: [
+                "rgba(255, 99, 132, 1)",
+                "rgba(75, 192, 192, 1)",
+                "rgba(153, 102, 255, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        },
+      });
+    </script>
+  </body>
+</html>

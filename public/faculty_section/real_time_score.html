@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-time Quiz Scores</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+      .dashboard {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .graphs {
+        margin-top: 30px;
+        width: 80%;
+      }
+      canvas {
+        width: 100%;
+        height: 400px;
+      }
+      #score-pie-chart {
+        width: 700px !important;
+        height: 700px !important; /* Adjust the pie chart size here */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard">
+      <div class="graphs">
+        <h3>Student Scores</h3>
+        <canvas id="score-bar-chart"></canvas>
+        <h3>Score Distribution</h3>
+        <canvas id="score-pie-chart"></canvas>
+      </div>
+    </div>
+
+    <script>
+      // Initial dummy data
+      const initialStudentScores = [90, 85, 78, 92, 88, 95, 67, 81];
+      const initialScoreDistribution = [2, 3, 4]; // Number of students in score ranges (0-50%, 51-80%, 81-100%)
+
+      const ctxBar = document
+        .getElementById("score-bar-chart")
+        .getContext("2d");
+      const ctxPie = document
+        .getElementById("score-pie-chart")
+        .getContext("2d");
+
+      // Create the initial bar chart
+      const barChart = new Chart(ctxBar, {
+        type: "bar",
+        data: {
+          labels: [
+            "Student 1",
+            "Student 2",
+            "Student 3",
+            "Student 4",
+            "Student 5",
+            "Student 6",
+            "Student 7",
+            "Student 8",
+          ],
+          datasets: [
+            {
+              label: "Scores",
+              data: initialStudentScores,
+              backgroundColor: "rgba(54, 162, 235, 0.2)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          animation: {
+            duration: 1000, // animation duration in ms
+            easing: "easeOutBounce", // smooth transition
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+
+      // Create the initial pie chart
+      const pieChart = new Chart(ctxPie, {
+        type: "pie",
+        data: {
+          labels: ["0-50%", "51-80%", "81-100%"],
+          datasets: [
+            {
+              label: "Score Distribution",
+              data: initialScoreDistribution,
+              backgroundColor: [
+                "rgba(255, 99, 132, 0.2)",
+                "rgba(75, 192, 192, 0.2)",
+                "rgba(153, 102, 255, 0.2)",
+              ],
+              borderColor: [
+                "rgba(255, 99, 132, 1)",
+                "rgba(75, 192, 192, 1)",
+                "rgba(153, 102, 255, 1)",
+              ],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          animation: {
+            duration: 1000,
+            easing: "easeOutBounce",
+          },
+        },
+      });
+
+      // Simulating real-time data update with setInterval (for every 5 seconds)
+      let updateCount = 0;
+      setInterval(() => {
+        // Simulate new random scores
+        const updatedScores = initialStudentScores.map(
+          (score) => score + (Math.floor(Math.random() * 5) - 2)
+        ); // Random change between -2 and +2
+
+        // Update bar chart data dynamically
+        barChart.data.datasets[0].data = updatedScores;
+        barChart.update();
+
+        // Simulate new score distribution (random values to simulate different percentage ranges)
+        const updatedDistribution = [
+          Math.floor(Math.random() * 5),
+          Math.floor(Math.random() * 5),
+          Math.floor(Math.random() * 5),
+        ];
+
+        // Update pie chart data dynamically
+        pieChart.data.datasets[0].data = updatedDistribution;
+        pieChart.update();
+
+        console.log(`Data updated ${++updateCount} times`);
+      }, 5000); // Update every 5 seconds
+    </script>
+  </body>
+</html>
